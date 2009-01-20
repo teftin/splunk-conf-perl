@@ -65,7 +65,7 @@ sub req {
     my ( $self, $url, $meth, $body ) = @_;
     $meth = 'GET' unless $meth;
     croak 'not logged in' unless defined $self->skey;
-    my $req = HTTP::Request->new( $meth => $self->_url_for($url) );
+    my $req = HTTP::Request->new($meth => $self->_url_for($url));
     $req->header(Authorization => 'Splunk '.$self->skey);
     if ( $body ) {
         if ( ref $body eq 'HASH' ) {
@@ -86,13 +86,13 @@ sub path_for {
 
 sub list {
     my ( $self, @path ) = @_;
-    my $list = XMLin($self->req( $self->path_for(@path)))->{entry};
+    my $list = XMLin($self->req($self->path_for(@path)))->{entry};
     return map { $list->{$_}->{title} } keys %$list;
 }
 
 sub stanza_create {
     my ( $self, $name, $stanza ) = @_;
-    $self->req( $self->path_for($name), 'POST', { __stanza => $stanza });
+    $self->req( $self->path_for($name), 'POST', { __stanza => $stanza } );
 }
 
 # splunk really only sets it to disabled
@@ -113,7 +113,7 @@ sub stanza_attrib_replace {
 
 sub stanza_attrib_kv {
     my ( $self, $name, $stanza ) = @_;
-    my $list = XMLin($self->req( $self->path_for($name, $stanza)))->{entry};
+    my $list = XMLin($self->req($self->path_for($name, $stanza)))->{entry};
     return map { $list->{$_}->{title}, $list->{$_}->{content}->{content} } keys %$list;
 }
 
@@ -123,20 +123,36 @@ Splunk::Conf - access/modify splunk configuration
 
 =head1 SYNOPSIS
 
-my $splunk = Splunk::Conf->new;
-$splunk->login('admin', 'changeme');
-$splunk->list('inputs');
-$splunk->stanza_create('inputs', 'monitor:///hello/world');
-$splunk->stanza_attrib_update('inputs', 'monitor:///hello/world',
+use Splunk::Conf;
+
+eval {
+  my $splunk = Splunk::Conf->new;
+  $splunk->login('admin', 'changeme');
+
+  my @stanza_list = $splunk->list('inputs');
+  $splunk->stanza_create('inputs', 'monitor:///hello/world');
+  $splunk->stanza_attrib_update('inputs', 'monitor:///hello/world',
     disabled => 'false',
     host_segment => 3,
     sourcetype => 'syslog');
-my %attribs = $splunk->stanza_attrib_kv('inputs', 'monitor:///hello/world');
+  my %attribs = $splunk->stanza_attrib_kv('inputs', 'monitor:///hello/world');
+};
+if ($@) {
+  print 'error: '.$@;
+}
 
 =head1 DESCRIPTION
 
 This is simple module using splunk rest api to access/modify splunk
 configuration.
+It tries to hind underlying REST api in somewhat-procedural interface
+
+=head1 TODO
+
+- oo. wrap files/stanzas in objects
+- better error handling
+- docs
+- handle other endpoints
 
 =head1 AUTHOR
 
