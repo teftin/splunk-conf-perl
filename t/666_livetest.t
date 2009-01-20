@@ -1,4 +1,4 @@
-use Test::More no_plan => 1;
+use Test::More no_plan;
 
 use strict;
 use warnings;
@@ -19,7 +19,7 @@ my $pass = $ENV{SPLUNK_PASS} || 'changeme';
 my $skey = $splunk->login( $user, $pass );
 
 like( $skey, qr/\w+/, '... logged in');
-is( $key, $splunk, '... key stored properly');
+is( $skey, $splunk->skey, '... key stored properly');
 
 #$splunk->stanza_remove( 'inputs', 'monitor:///hello/world' );
 $splunk->stanza_create( 'inputs', 'monitor:///hello/world' );
