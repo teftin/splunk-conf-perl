@@ -144,7 +144,10 @@ Stanislaw Sawa - stanislaw.sawa (at) sns.bskyb.com
 
 =head1 LICENSE
 
-This library is free software under the same terms as perl itself
+Copyright (C) 2008 Sky Network Services. All Rights Reserved.
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut
 
