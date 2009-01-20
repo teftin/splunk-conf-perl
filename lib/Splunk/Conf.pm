@@ -6,7 +6,8 @@ use XML::Simple;
 use URI;
 use URI::Escape;
 use Carp;
-
+use 5.008001;
+our $VERSION = '0.001';
 
 has url => (
     is => 'ro',
@@ -115,5 +116,36 @@ sub stanza_attrib_kv {
     my $list = XMLin($self->req( $self->path_for($name, $stanza)))->{entry};
     return map { $list->{$_}->{title}, $list->{$_}->{content}->{content} } keys %$list;
 }
+
+=head1 NAME
+
+Splunk::Conf - access/modify splunk configuration
+
+=head1 SYNOPSIS
+
+my $splunk = Splunk::Conf->new;
+$splunk->login('admin', 'changeme');
+$splunk->list('inputs');
+$splunk->stanza_create('inputs', 'monitor:///hello/world');
+$splunk->stanza_attrib_update('inputs', 'monitor:///hello/world',
+    disabled => 'false',
+    host_segment => 3,
+    sourcetype => 'syslog');
+my %attribs = $splunk->stanza_attrib_kv('inputs', 'monitor:///hello/world');
+
+=head1 DESCRIPTION
+
+This is simple module using splunk rest api to access/modify splunk
+configuration.
+
+=head1 AUTHOR
+
+Stanislaw Sawa - stanislaw.sawa (at) sns.bskyb.com
+
+=head1 LICENSE
+
+This library is free software under the same terms as perl itself
+
+=cut
 
 42;
