@@ -47,13 +47,12 @@ sub _url_strip {
 sub login {
     my ( $self, $user, $pass ) = @_;
     $self->skey(''); #nuke current session key
-    my $res = $self->req('/auth/login', 'POST', {
+    my $res = XMLin($self->req('/auth/login', 'POST', {
         username => $user,
-        password => $pass });
-    my $res_d = XMLin($res->content);
-    croak 'cannot log in' unless exists $res_d->{sessionKey};
-    $self->skey($res_d->{sessionKey});
-    return $res_d->{sessionKey};
+        password => $pass }));
+    croak 'cannot log in' unless exists $res->{sessionKey};
+    $self->skey($res->{sessionKey});
+    return $res->{sessionKey};
 }
 
 sub req {
