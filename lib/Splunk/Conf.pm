@@ -7,7 +7,7 @@ use URI;
 use URI::Escape;
 use Carp;
 use 5.008001;
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 has url => (
     is => 'ro',
