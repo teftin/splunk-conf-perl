@@ -46,17 +46,12 @@ sub _url_strip {
 
 sub login {
     my ( $self, $user, $pass ) = @_;
-
-    my $req = HTTP::Request->new( POST => $self->_url_for('/auth/login') );
-    $req->content_type('application/x-www-form-urlencoded');
-    $req->content('username='.$user.'&password='.$pass);
-
-    my $res = $self->ua->request($req);
-    croak 'cannot log in, got: '.$res->status_line unless $res->is_success;
-
+    $self->skey(''); #nuke current session key
+    my $res = $self->req('/auth/login', 'POST',
+                         username => $user,
+                         password => $pass);
     my $res_d = XMLin($res->content);
     croak 'cannot log in' unless exists $res_d->{sessionKey};
-
     $self->skey($res_d->{sessionKey});
     return $res_d->{sessionKey};
 }
@@ -64,9 +59,8 @@ sub login {
 sub req {
     my ( $self, $url, $meth, $body ) = @_;
     $meth = 'GET' unless $meth;
-    croak 'not logged in' unless defined $self->skey;
     my $req = HTTP::Request->new($meth => $self->_url_for($url));
-    $req->header(Authorization => 'Splunk '.$self->skey);
+    $req->header(Authorization => 'Splunk '.$self->skey) if $self->skey;
     if ( $body ) {
         if ( ref $body eq 'HASH' ) {
             $req->content( join '&', map { join '=', $_, $body->{$_} } keys %$body );
