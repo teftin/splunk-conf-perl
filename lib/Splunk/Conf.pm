@@ -37,13 +37,6 @@ sub _url_for {
     return $self->url.$path;
 }
 
-sub _url_strip {
-    my ( $self, $path ) = @_;
-    my $base_path = $self->url;
-    $path =~ s/^ $base_path //x;
-    return $path;
-}
-
 sub login {
     my ( $self, $user, $pass ) = @_;
     $self->skey(''); #nuke current session key
@@ -62,7 +55,9 @@ sub req {
     $req->header(Authorization => 'Splunk '.$self->skey) if $self->skey;
     if ( $body ) {
         if ( ref $body eq 'HASH' ) {
-            $req->content( join '&', map { join '=', $_, $body->{$_} } keys %$body );
+            my $url = URI->new('http:');
+            $url->query_form( %$body );
+            $req->content( $url->query );
         }else {
             $req->content( $body );
         }
